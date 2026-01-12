@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="雪梨旅行">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/826/826070.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#00AEEF">
+    <title>雪梨十日慢活助手</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #F8FAFC; margin: 0; -webkit-tap-highlight-color: transparent; }
+        .header-gradient { background: linear-gradient(135deg, #0c4a6e 0%, #075985 100%); padding-top: env(safe-area-inset-top); }
+        .card { background: white; border-radius: 24px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 16px; border: 1px solid #f1f5f9; }
+        .day-btn { transition: all 0.2s; flex-shrink: 0; }
+        .day-btn.active { background: white; color: #0c4a6e; transform: scale(1.1); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .nav-active { color: #00AEEF; }
+        .nav-inactive { color: #cbd5e1; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="text-slate-800">
+    <div class="max-w-md mx-auto min-h-screen flex flex-col pb-24">
+        <header class="header-gradient text-white rounded-b-[40px] shadow-xl sticky top-0 z-50">
+            <div class="px-8 pt-10 pb-6">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h1 id="ui-day-label" class="text-3xl font-black">Day 4</h1>
+                        <p id="ui-day-title" class="text-sky-200 text-xs font-bold uppercase tracking-widest mt-1">塔龍加動物園</p>
+                    </div>
+                    <div class="bg-white/10 px-4 py-2 rounded-2xl border border-white/20 text-center">
+                        <span class="text-[9px] block opacity-60 font-bold">匯率估計</span>
+                        <span class="text-sm font-black">21.2</span>
+                    </div>
+                </div>
+                <div id="day-scroller" class="flex gap-4 overflow-x-auto hide-scrollbar pb-2"></div>
+            </div>
+        </header>
+
+        <main class="px-6 mt-8 flex-grow">
+            <div id="view-trip" class="tab-view">
+                <div class="card bg-blue-50/50 border-blue-100 flex items-start gap-3">
+                    <div class="bg-blue-500 text-white p-2 rounded-lg text-xs"><i class="fa-solid fa-person-cane"></i></div>
+                    <div>
+                        <h4 class="font-bold text-blue-900 text-sm">長輩友善提醒</h4>
+                        <p id="ui-day-note" class="text-xs text-blue-800 mt-1 leading-relaxed"></p>
+                    </div>
+                </div>
+                <div id="itinerary-list" class="space-y-4"></div>
+                <button onclick="askAI()" id="ai-btn" class="w-full mt-6 bg-slate-900 text-white py-4 rounded-2xl shadow-xl flex items-center justify-center gap-3 font-bold active:scale-95 transition-all">
+                    <i class="fa-solid fa-wand-magic-sparkles text-sky-400"></i>
+                    <span>AI 行程助手建議</span>
+                </button>
+                <div id="ai-box" class="hidden mt-4 p-5 bg-white rounded-2xl border-l-4 border-sky-500 shadow-sm text-sm text-slate-600"></div>
+            </div>
+
+            <div id="view-wallet" class="tab-view hidden">
+                <div class="card bg-slate-900 text-white py-8 flex justify-between items-end shadow-2xl relative overflow-hidden">
+                    <div class="relative z-10">
+                        <p class="text-[10px] font-bold opacity-40 uppercase tracking-widest">總支出估算 (TWD)</p>
+                        <h2 id="total-twd" class="text-4xl font-black mt-1">$ 0</h2>
+                    </div>
+                    <div class="text-right relative z-10">
+                        <p class="text-[10px] opacity-40 uppercase">AUD</p>
+                        <p id="total-aud" class="font-bold text-sky-400">$ 0</p>
+                    </div>
+                    <i class="fa-solid fa-coins absolute right-[-10px] bottom-[-10px] text-white/5 text-8xl"></i>
+                </div>
+                <div class="card">
+                    <h3 class="font-black text-sm mb-4 text-slate-400 uppercase tracking-widest text-center">新增開銷紀錄</h3>
+                    <div class="space-y-3">
+                        <input type="text" id="exp-name" placeholder="項目名稱" class="w-full bg-slate-50 p-4 rounded-xl text-sm outline-none">
+                        <div class="flex gap-2">
+                            <input type="number" id="exp-aud" placeholder="AUD 金額" class="flex-1 bg-slate-50 p-4 rounded-xl text-sm outline-none">
+                            <button onclick="saveExpense()" class="bg-sky-600 text-white px-8 rounded-xl font-bold active:scale-95 transition-all">儲存</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="expense-list" class="space-y-3 pb-10"></div>
+            </div>
+        </main>
+
+        <nav class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-100 py-4 px-12 z-50 flex justify-around shadow-[0_-10px_20px_rgba(0,0,0,0.02)]">
+            <button onclick="switchTab('trip')" id="nav-trip" class="nav-active flex flex-col items-center gap-1 transition-all">
+                <i class="fa-solid fa-calendar-day text-2xl"></i>
+                <span class="text-[10px] font-black uppercase tracking-tighter">行程</span>
+            </button>
+            <button onclick="switchTab('wallet')" id="nav-wallet" class="nav-inactive flex flex-col items-center gap-1 transition-all">
+                <i class="fa-solid fa-wallet text-2xl"></i>
+                <span class="text-[10px] font-black uppercase tracking-tighter">記帳</span>
+            </button>
+        </nav>
+    </div>
+
+    <script>
+        const apiKey = "";
+        const rate = 21.2;
+        let dayIdx = 3;
+        let expenses = JSON.parse(localStorage.getItem('sydney_trip_data')) || [];
+
+        const tripData = [
+            { d: 1, t: "抵達雪梨", n: "機場接送最省心，首晚在唐人街吃慶祝餐。", s: ["機場私人接機", "入住市中心飯店", "達令港漫步與晚餐"] },
+            { d: 2, t: "經典地標", n: "歌劇院周邊平坦，適合長輩慢走散步。", s: ["歌劇院內部導覽", "皇家植物園", "麥覺理夫人角拍照"] },
+            { d: 3, t: "邦代海灘", n: "333號公車班次密集，直接刷卡即可。", s: ["Bondi Beach 散步", "網美泳池拍照", "帕丁頓區逛街"] },
+            { d: 4, t: "塔龍加動物園", n: "渡輪是必搭行程，風景精華都在海上。", s: ["環形碼頭搭渡輪", "與無尾熊合影", "長頸鹿景觀區"] },
+            { d: 5, t: "復古商場", n: "QVB 百年商場內有電梯，長輩逛街不累。", s: ["QVB 商場購物", "雪梨塔旋轉午餐", "皮特街伴手禮"] },
+            { d: 6, t: "藍山一日遊", n: "山上氣溫低，記得多帶一件輕便外套。", s: ["藍山纜車體驗", "三姐妹岩景觀", "盧拉小鎮下午茶"] },
+            { d: 7, t: "岩石區探索", n: "週末有市集可逛，路面多石子地請小心。", s: ["岩石區市集", "跨海大橋步道", "港灣景觀晚餐"] },
+            { d: 8, t: "魚市場海鮮", n: "現開生蠔最推，魚市場內地板較濕滑。", s: ["魚市場海鮮大餐", "巴蘭加魯公園", "賭場景觀區漫步"] },
+            { d: 9, t: "伴手禮採買", n: "超市買澳洲零食最便宜，記得備足體力。", s: ["Paddy's Market", "超市補貨大採購", "家族告別晚餐"] },
+            { d: 10, t: "平安返家", n: "退稅（TRS）需提早到機場，並準備好收據。", s: ["整理行李", "前往機場", "免稅店最後購物"] }
+        ];
+
+        function init() {
+            renderDayBar();
+            updateTripView();
+            renderExpenses();
+        }
+
+        function switchTab(t) {
+            document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
+            document.getElementById('view-' + t).classList.remove('hidden');
+            document.querySelectorAll('nav button').forEach(b => b.className = 'nav-inactive flex flex-col items-center gap-1');
+            document.getElementById('nav-' + t).className = 'nav-active flex flex-col items-center gap-1';
+        }
+
+        function renderDayBar() {
+            const bar = document.getElementById('day-scroller');
+            bar.innerHTML = tripData.map((d, i) => `
+                <button onclick="setDay(${i})" class="day-btn w-14 h-14 rounded-2xl flex-shrink-0 flex flex-col items-center justify-center font-bold ${i === dayIdx ? 'active' : 'bg-white/10 text-white/50'}">
+                    <span class="text-[8px]">D${d.d}</span>
+                    <span class="text-lg">${d.d}</span>
+                </button>
+            `).join('');
+        }
+
+        function setDay(i) {
+            dayIdx = i;
+            renderDayBar();
+            updateTripView();
+            document.getElementById('ai-box').classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function updateTripView() {
+            const d = tripData[dayIdx];
+            document.getElementById('ui-day-label').innerText = `Day ${d.d}`;
+            document.getElementById('ui-day-title').innerText = d.t;
+            document.getElementById('ui-day-note').innerText = d.n;
+            document.getElementById('itinerary-list').innerHTML = d.s.map(item => `
+                <div class="card flex items-center justify-between py-6 border-l-4 border-l-sky-500">
+                    <div class="flex items-center gap-4">
+                        <i class="fa-solid fa-circle-check text-sky-200"></i>
+                        <span class="font-bold text-slate-700 text-sm">${item}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function saveExpense() {
+            const name = document.getElementById('exp-name').value;
+            const aud = parseFloat(document.getElementById('exp-aud').value);
+            if(!name || isNaN(aud)) return;
+            expenses.push({ id: Date.now(), name, aud, twd: Math.round(aud * rate) });
+            localStorage.setItem('sydney_trip_data', JSON.stringify(expenses));
+            document.getElementById('exp-name').value = '';
+            document.getElementById('exp-aud').value = '';
+            renderExpenses();
+        }
+
+        function deleteExpense(id) {
+            expenses = expenses.filter(e => e.id !== id);
+            localStorage.setItem('sydney_trip_data', JSON.stringify(expenses));
+            renderExpenses();
+        }
+
+        function renderExpenses() {
+            const list = document.getElementById('expense-list');
+            let tAUD = 0, tTWD = 0;
+            list.innerHTML = expenses.map(e => {
+                tAUD += e.aud; tTWD += e.twd;
+                return `
+                    <div class="bg-white p-5 rounded-3xl flex justify-between items-center shadow-sm border border-slate-50">
+                        <div>
+                            <p class="font-bold text-slate-800 text-sm">${e.name}</p>
+                            <p class="text-[10px] text-slate-400">NT$ ${e.twd.toLocaleString()}</p>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="font-black text-sky-600 text-sm">$ ${e.aud}</span>
+                            <button onclick="deleteExpense(${e.id})" class="text-slate-200"><i class="fa-solid fa-circle-xmark"></i></button>
+                        </div>
+                    </div>
+                `;
+            }).reverse().join('');
+            document.getElementById('total-aud').innerText = `$ ${tAUD.toFixed(1)}`;
+            document.getElementById('total-twd').innerText = `$ ${tTWD.toLocaleString()}`;
+        }
+
+        async function askAI() {
+            const box = document.getElementById('ai-box');
+            box.classList.remove('hidden');
+            box.innerHTML = "<i class='fa-solid fa-spinner fa-spin mr-2'></i>AI 小助手規劃中...";
+            try {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: `我正在雪梨第 ${dayIdx+1} 天：${tripData[dayIdx].t}，請給 3 個簡短建議。` }] }] })
+                });
+                const data = await res.json();
+                box.innerHTML = `<div class='font-black mb-1 text-sky-700'>✨ AI 小助手叮嚀</div>` + data.candidates[0].content.parts[0].text;
+            } catch (e) { box.innerText = "網路忙碌中。"; }
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
+

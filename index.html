@@ -2,307 +2,397 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
-    <title>雪梨十日慢活助手</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>雪梨十日慢活助手 - 家族旅行版</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
-        body { font-family: 'Noto Sans TC', sans-serif; background-color: #F8FAFC; margin: 0; -webkit-tap-highlight-color: transparent; }
-        .header-gradient { background: linear-gradient(135deg, #0c4a6e 0%, #075985 100%); padding-top: env(safe-area-inset-top); }
-        .card { background: white; border-radius: 20px; padding: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 12px; border: 1px solid #f1f5f9; }
-        .day-btn { transition: all 0.2s; flex-shrink: 0; }
-        .day-btn.active { background: white; color: #0c4a6e; transform: scale(1.1); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .nav-active { color: #00AEEF; }
-        .nav-inactive { color: #cbd5e1; }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .kkday-btn { background: #00AEEF; color: white; padding: 8px 12px; border-radius: 10px; font-size: 12px; font-weight: bold; display: inline-flex; items-center: center; gap: 5px; }
-        .car-btn { background: #059669; color: white; padding: 8px 12px; border-radius: 10px; font-size: 12px; font-weight: bold; display: inline-flex; items-center: center; gap: 5px; }
-        .transport-tag { background: #f1f5f9; color: #475569; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: bold; margin-bottom: 10px; display: inline-block; }
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap');
+        
+        :root {
+            --app-primary: #00AEEF;
+            --app-bg: #F8FAFC;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: var(--app-bg);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(15px);
+            border-top: 1px solid rgba(0,0,0,0.08);
+        }
+
+        .active-tab {
+            color: var(--app-primary);
+            transform: scale(1.1);
+        }
+        
+        .card-shadow {
+            box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.06);
+        }
+
+        .img-gradient {
+            background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.85));
+        }
+
+        /* 隱藏滾動條但保持功能 */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="text-slate-800">
+<body class="pb-28">
 
-    <div class="max-w-md mx-auto min-h-screen flex flex-col pb-24">
-        <!-- Header -->
-        <header class="header-gradient text-white rounded-b-[30px] shadow-xl sticky top-0 z-50">
-            <div class="px-6 pt-10 pb-6">
-                <div class="flex justify-between items-center mb-6">
-                    <div>
-                        <h1 id="ui-day-label" class="text-2xl font-black">Day 1</h1>
-                        <p id="ui-day-title" class="text-sky-200 text-xs font-bold mt-1">抵達雪梨</p>
-                    </div>
-                    <div class="bg-white/10 px-3 py-1 rounded-xl border border-white/20 text-center">
-                        <span class="text-[10px] block opacity-70">1 AUD ≈ 21.2</span>
-                    </div>
-                </div>
-                <div id="day-scroller" class="flex gap-3 overflow-x-auto hide-scrollbar"></div>
+    <!-- App Header -->
+    <header class="bg-white px-5 pt-8 pb-4 sticky top-0 z-40 shadow-sm">
+        <div class="flex justify-between items-start">
+            <div>
+                <h1 class="text-xl font-black text-slate-800 tracking-tight">雪梨家族旅行 <span class="text-blue-500 text-sm font-normal">10 Days</span></h1>
+                <p class="text-slate-400 text-[10px] uppercase tracking-widest font-bold">Member: 4人 | 唐人街區域住宿</p>
             </div>
-        </header>
+            <div class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-[10px] font-black">匯率 1:21</div>
+        </div>
 
-        <!-- Main Content -->
-        <main class="px-5 mt-6 flex-grow">
-            <!-- 行程 View -->
-            <div id="view-trip">
-                <div id="booking-links" class="flex gap-2 mb-4 overflow-x-auto hide-scrollbar">
-                    <!-- 動態插入預訂連結 -->
-                </div>
+        <!-- Date Tab Scroller -->
+        <div class="no-scrollbar flex overflow-x-auto gap-6 mt-6 pb-2" id="dateTabs">
+            <!-- 由 JS 生成 -->
+        </div>
+    </header>
 
-                <div class="mb-2">
-                    <div id="transport-display"></div>
-                </div>
-                
-                <div id="itinerary-list" class="space-y-3"></div>
+    <!-- Main Content -->
+    <main id="appContent" class="px-5 mt-4 space-y-5">
+        <!-- 由 JS 生成 -->
+    </main>
 
-                <div class="mt-8 mb-4">
-                    <h2 class="text-lg font-black flex items-center gap-2">
-                        <i class="fa-solid fa-lightbulb text-yellow-500"></i> 在地導遊建議
-                    </h2>
-                </div>
-                <div id="expert-tips" class="card leading-relaxed text-sm text-slate-600"></div>
-            </div>
-
-            <!-- 記帳 View -->
-            <div id="view-wallet" class="hidden">
-                <div class="card bg-slate-900 text-white py-6 flex justify-between items-end shadow-xl">
-                    <div>
-                        <p class="text-[10px] font-bold opacity-40 uppercase">總支出 (TWD)</p>
-                        <h2 id="total-twd" class="text-3xl font-black mt-1">$ 0</h2>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-[10px] opacity-40 uppercase">AUD 澳幣</p>
-                        <p id="total-aud" class="font-bold text-sky-400">$ 0</p>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="space-y-3">
-                        <input type="text" id="exp-name" placeholder="項目名稱" class="w-full bg-slate-50 p-3 rounded-xl text-sm outline-none border border-slate-100 focus:border-sky-300">
-                        <div class="flex gap-2">
-                            <input type="number" id="exp-aud" placeholder="金額 (AUD)" class="flex-1 bg-slate-50 p-3 rounded-xl text-sm outline-none border border-slate-100 focus:border-sky-300">
-                            <button onclick="saveExpense()" class="bg-sky-600 text-white px-6 rounded-xl font-bold">儲存</button>
-                        </div>
-                    </div>
-                </div>
-                <div id="expense-list" class="space-y-2"></div>
-            </div>
-        </main>
-
-        <!-- Navigation -->
-        <nav class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-100 py-3 px-10 z-50 flex justify-around shadow-lg">
-            <button onclick="switchTab('trip')" id="nav-trip" class="nav-active flex flex-col items-center gap-1">
-                <i class="fa-solid fa-route text-xl"></i>
-                <span class="text-[10px] font-bold">行程規劃</span>
-            </button>
-            <button onclick="switchTab('wallet')" id="nav-wallet" class="nav-inactive flex flex-col items-center gap-1">
-                <i class="fa-solid fa-receipt text-xl"></i>
-                <span class="text-[10px] font-bold">記帳本</span>
-            </button>
-        </nav>
-    </div>
+    <!-- Navigation Bar -->
+    <nav class="glass-nav fixed bottom-0 left-0 right-0 h-20 flex justify-around items-center px-4 z-50">
+        <button onclick="changeMenu('itinerary')" id="menu-itinerary" class="text-blue-500 flex flex-col items-center gap-1">
+            <i class="fa-solid fa-calendar-check text-xl"></i>
+            <span class="text-[9px] font-bold">完整行程</span>
+        </button>
+        <button onclick="changeMenu('expense')" id="menu-expense" class="text-slate-400 flex flex-col items-center gap-1">
+            <i class="fa-solid fa-coins text-xl"></i>
+            <span class="text-[9px] font-bold">記帳(台幣)</span>
+        </button>
+        <button onclick="changeMenu('essentials')" id="menu-essentials" class="text-slate-400 flex flex-col items-center gap-1">
+            <i class="fa-solid fa-info-circle text-xl"></i>
+            <span class="text-[9px] font-bold">行前指南</span>
+        </button>
+    </nav>
 
     <script>
-        const rate = 21.2;
-        let dayIdx = 0;
-        let expenses = JSON.parse(localStorage.getItem('sydney_trip_data')) || [];
+        const AUD_TO_TWD = 21.0;
 
-        const tripData = [
+        const itineraryData = [
             { 
-                d: 1, t: "抵達雪梨與唐人街", 
-                s: ["雪梨機場 (SYD)", "市中心飯店", "唐人街慶祝晚餐"],
-                trans: "預約包車接機 (最輕鬆)",
-                links: [
-                    { name: "機場接送預約", url: "https://www.kkday.com/zh-tw/product/23304", icon: "fa-car" }
-                ],
-                tips: "<b>在地建議：</b>第一天建議直接預約私人接機。雪梨唐人街美食選擇多且有華語服務，對長輩來說最親切。推薦『金唐』系列的粵菜。"
+                date: "2026-09-25", weekday: "Fri", title: "抵達雪梨與達令港", 
+                img: "https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&w=800&q=80",
+                seniorNote: "機場接送最省力。唐人街離飯店近，第一晚先吃海鮮慶祝！",
+                events: [
+                    { time: "14:00", type: "hotel", name: "飯店 Check-in", info: "唐人街/Haymarket 區域。放下行李稍作休息。", transport: "機場 → 飯店：強烈建議預約私家接送 (Private Transfer)，四人平均一人約 $20 AUD，比地鐵方便且不用搬行李。", map: "Chinatown+Sydney", cost: "-" },
+                    { time: "18:00", type: "food", name: "達令港海鮮晚餐", info: "經典海鮮拼盤，無障礙友善。", transport: "飯店 → 達令港：從 Chinatown 步行約 10-15 分鐘平路即可到達。", map: "Darling+Harbour", cost: "$$$" }
+                ]
             },
             { 
-                d: 2, t: "歌劇院與植物園", 
-                s: ["歌劇院內部導覽", "皇家植物園", "麥覺理夫人角"],
-                trans: "市區漫步",
-                links: [
-                    { name: "歌劇院中文導覽", url: "https://www.kkday.com/zh-tw/product/3894", icon: "fa-ticket" }
-                ],
-                tips: "<b>在地建議：</b>歌劇院內部導覽建議先預訂中文時段。皇家植物園有無障礙步道，傍晚拍照最美。如果長輩走累了，園內有觀光小火車。"
+                date: "2026-09-26", weekday: "Sat", title: "經典地標之旅", 
+                img: "https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?auto=format&fit=crop&w=800&q=80",
+                seniorNote: "歌劇院內部有電梯，長輩拍照建議在環形碼頭側。麥覺理夫人角建議叫 Uber。",
+                events: [
+                    { time: "10:00", type: "sight", name: "雪梨歌劇院 & 環形碼頭", info: "必看地標。可參加中文內部導覽。", transport: "飯店 → 環形碼頭：從 Central 搭 Train 到 Circular Quay 站，下車即達。", map: "Sydney+Opera+House", cost: "$43" },
+                    { time: "12:30", type: "food", name: "Opera Bar 午餐", info: "在歌劇院旁用餐，景色絕佳。", transport: "步行即達。", map: "Opera+Bar", cost: "$$" },
+                    { time: "15:00", type: "sight", name: "麥覺理夫人角", info: "拍攝歌劇院+大橋同框的最佳視角。", transport: "建議搭 Uber/Taxi 前往，因為從植物園走過去對長輩來說太遠 (約 2km)。", map: "Mrs+Macquaries+Chair", cost: "免費" }
+                ]
             },
             { 
-                d: 3, t: "邦代海灘與雪梨塔", 
-                s: ["Bondi Beach", "網美泳池拍照", "雪梨塔晚餐"],
-                trans: "公車 333 / Uber",
-                links: [
-                    { name: "雪梨塔自助餐券", url: "https://www.kkday.com/zh-tw/product/6421", icon: "fa-utensils" }
-                ],
-                tips: "<b>在地建議：</b>333號公車是低底盤，適合長輩。雪梨塔旋轉餐廳可以看全景，適合帶長輩輕鬆吃飯，不用一直走路找餐廳。"
+                date: "2026-09-27", weekday: "Sun", title: "邦代海灘放鬆", 
+                img: "https://images.unsplash.com/photo-1524362103339-498520268297?auto=format&fit=crop&w=800&q=80",
+                seniorNote: "週末人多，海邊咖啡廳建議先訂位。回程體力不支可直接搭 Uber。",
+                events: [
+                    { time: "10:00", type: "sight", name: "Bondi Beach", info: "看絕美泳池 Icebergs Pool。重點：吹海風漫步。", transport: "飯店 → 邦代：搭 Train 到 Bondi Junction，轉乘 333 號公車直達海灘。", map: "Bondi+Beach", cost: "免費" },
+                    { time: "15:00", type: "sight", name: "聖瑪麗大教堂 & 海德公園", info: "市中心絕美教堂。內部莊嚴安靜。", transport: "從邦代搭公車回市中心 Hyde Park 站下車。", map: "St+Mary's+Cathedral", cost: "免費" }
+                ]
             },
             { 
-                d: 4, t: "塔龍加動物園", 
-                s: ["渡輪體驗", "動物園探索", "環形碼頭"],
-                trans: "F2 渡輪",
-                links: [
-                    { name: "動物園門票", url: "https://www.kkday.com/zh-tw/product/6011", icon: "fa-ticket" }
-                ],
-                tips: "<b>在地建議：</b>進園後先搭纜車到山頂，再順著坡度『往下逛』回碼頭。這樣完全不用爬山，長輩體力負擔最小。"
+                date: "2026-09-28", weekday: "Mon", title: "動物園與曼利渡輪", 
+                img: "https://images.unsplash.com/photo-1510443105227-51bb3dffa43d?auto=format&fit=crop&w=800&q=80",
+                seniorNote: "動物園一定要搭纜車上山再往下逛。搭船時風大，幫長輩備好帽子與圍巾。",
+                events: [
+                    { time: "10:00", type: "sight", name: "塔龍加動物園", info: "重點：與考拉拍照，長頸鹿背景是雪梨港。", transport: "搭渡輪：在環形碼頭 Wharf 4 搭 Ferry 直達 Taronga Zoo 碼頭，下船即是纜車站。", map: "Taronga+Zoo", cost: "$45" },
+                    { time: "15:00", type: "sight", name: "Manly Beach", info: "搭船橫跨雪梨港，風景非常壯觀。", transport: "從動物園碼頭搭渡輪到 Manly，或回環形碼頭轉乘 Fast Ferry 到 Manly。", map: "Manly+Beach", cost: "$10" }
+                ]
             },
             { 
-                d: 5, t: "百年百貨 QVB", 
-                s: ["QVB 百貨購物", "皮特街 Pitt St", "海德公園"],
-                trans: "輕軌 L1/L2",
-                links: [],
-                tips: "<b>在地建議：</b>QVB 是全世界最美商場，有無障礙電梯。二樓有很棒的英式下午茶，逛街累了可以休息一下。"
+                date: "2026-09-29", weekday: "Tue", title: "市區建築與購物", 
+                img: "https://images.unsplash.com/photo-1490650034439-fd184c3c86a5?auto=format&fit=crop&w=800&q=80",
+                seniorNote: "QVB 內部非常漂亮但階梯多，請尋找復古電梯。雪梨塔餐廳可看旋轉夜景。",
+                events: [
+                    { time: "11:00", type: "sight", name: "QVB 維多利亞女王大廈", info: "世界最美商場之一。欣賞百年電梯與時鐘。", transport: "步行：飯店走過去約 10 分鐘，或搭 L2/L3 輕軌到 Town Hall。", map: "Queen+Victoria+Building", cost: "免費" },
+                    { time: "18:00", type: "food", name: "雪梨塔旋轉餐廳", info: "一邊吃飯一邊看 360 度全景 (可選)。", transport: "就在 Pitt Street Mall 購物區上方。", map: "Sydney+Tower+Eye", cost: "$$$" }
+                ]
             },
             { 
-                d: 6, t: "藍山國家公園", 
-                s: ["景觀纜車", "三姐妹岩", "盧拉小鎮"],
-                trans: "包車或一日遊團",
-                links: [
-                    { name: "藍山一日遊(包車)", url: "https://www.kkday.com/zh-tw/product/140640", icon: "fa-bus" },
-                    { name: "藍山纜車套票", url: "https://www.kkday.com/zh-tw/product/6045", icon: "fa-ticket" }
-                ],
-                tips: "<b>在地建議：</b>藍山建議直接參加 KKday 一日遊或包車，長輩不用轉火車。山上風大，記得帶件外套防寒。"
+                date: "2026-09-30", weekday: "Wed", title: "藍山國家公園一日遊", 
+                img: "https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?auto=format&fit=crop&w=800&q=80",
+                seniorNote: "今日行程耗體力。已預定包車/一日遊最明智，纜車皆有無障礙入口。",
+                events: [
+                    { time: "09:00", type: "transport", name: "包車出發", info: "飯店門口上車。省去轉車奔波。", transport: "包車或 KKday/Klook 中文團：約 1.5 小時抵達。", map: "Blue+Mountains", cost: "套票" },
+                    { time: "11:00", type: "sight", name: "Scenic World 景觀世界", info: "搭乘三種不同纜車，看三姊妹岩。", transport: "園內轉乘纜車。", map: "Scenic+World", cost: "套票" }
+                ]
             },
             { 
-                d: 7, t: "週末岩石區市集", 
-                s: ["岩石區市集", "跨海大橋步道", "港灣咖啡"],
-                trans: "火車/輕軌",
-                links: [],
-                tips: "<b>在地建議：</b>市集有很多手工工藝品。這區地板是舊石磚，比較不平，請長輩慢走。港灣大橋有電梯可以上去看風景。"
+                date: "2026-10-01", weekday: "Thu", title: "大橋與博物館", 
+                img: "https://images.unsplash.com/photo-1524362103339-498520268297?auto=format&fit=crop&w=800&q=80",
+                seniorNote: "若不想爬大橋台階，在 Pylon Lookout 拍照即可。岩石區餐廳都很精緻。",
+                events: [
+                    { time: "10:30", type: "sight", name: "雪梨大橋 & 觀景台", info: "俯瞰港灣，適合體力較好的成員。", transport: "搭 Train 到 Milsons Point 或 Circular Quay 開始步行。", map: "Sydney+Harbour+Bridge", cost: "免費" },
+                    { time: "14:00", type: "sight", name: "雪梨博物館", info: "了解這座城市的歷史。", transport: "位於 Circular Quay 附近。", map: "Museum+of+Sydney", cost: "$" }
+                ]
             },
             { 
-                d: 8, t: "魚市場與情人港", 
-                s: ["魚市場海鮮", "情人港散步", "巴蘭加魯"],
-                trans: "輕軌 L1",
-                links: [],
-                tips: "<b>在地建議：</b>魚市場建議早上去吃生蠔。情人港（達令港）區有無障礙木棧道，晚上吹海風看風景非常愜意。"
+                date: "2026-10-02", weekday: "Fri", title: "魚市場海鮮盛宴", 
+                img: "https://images.unsplash.com/photo-1563245159-f793f19d8c37?auto=format&fit=crop&w=800&q=80",
+                seniorNote: "魚市場地板較濕滑，提醒長輩走路小心。Barangaroo 區是新興發展區，海濱步道平坦好走。",
+                events: [
+                    { time: "11:00", type: "food", name: "雪梨魚市場", info: "生蠔、龍蝦、刺身。避開週末人潮。", transport: "搭輕軌：在 Central 或 Haymarket 搭 L1 輕軌到 Fish Market 站。", map: "Sydney+Fish+Market", cost: "$$" },
+                    { time: "15:00", type: "sight", name: "Barangaroo Reserve", info: "現代化建築與森林公園。", transport: "從魚市場搭 Uber 約 10 分鐘，或步行經 Pyrmont Bridge 到達。", map: "Barangaroo+Reserve", cost: "免費" }
+                ]
             },
             { 
-                d: 9, t: "超市伴手禮採買", 
-                s: ["Paddy's Market", "Woolworths 超市", "告別晚餐"],
-                trans: "Uber / 步行",
-                links: [],
-                tips: "<b>在地建議：</b>今天採買澳洲神仙水、木瓜霜等伴手禮。超市買 Tim Tam 巧克力最便宜，可以直接用信用卡感應結帳。"
+                date: "2026-10-03", weekday: "Sat", title: "自由活動與血拼", 
+                img: "https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?auto=format&fit=crop&w=800&q=80",
+                seniorNote: "最後一天放鬆，在唐人街附近逛逛就好，不用跑太遠。",
+                events: [
+                    { time: "11:00", type: "sight", name: "自由活動 / 採買伴手禮", info: "Paddy's Markets 或 Coles/Woolworths 超市。", transport: "都在飯店附近，步行即可。", map: "Paddys+Markets", cost: "-" },
+                    { time: "18:00", type: "food", name: "唐人街告別晚餐", info: "推薦：金唐 (Golden Century) 或一風堂。", transport: "步行即達。", map: "Chinatown+Sydney", cost: "$$" }
+                ]
             },
             { 
-                d: 10, t: "退稅與歸途", 
-                s: ["飯店退房", "機場 TRS 退稅", "歸途"],
-                trans: "預約送機包車",
-                links: [
-                    { name: "送機包車預約", url: "https://www.kkday.com/zh-tw/product/23304", icon: "fa-car" }
-                ],
-                tips: "<b>在地建議：</b>退稅要預留至少 1.5 小時，收據準備好。TRS App 先填好可以加速。建議直接包車到機場，行李重也不擔心。"
+                date: "2026-10-04", weekday: "Sun", title: "返家之旅", 
+                img: "https://images.unsplash.com/photo-1542296332-2e4473faf563?auto=format&fit=crop&w=800&q=80",
+                seniorNote: "飯店退房後可行李寄放，預定好送機車輛。",
+                events: [
+                    { time: "10:00", type: "hotel", name: "飯店退房", info: "享用悠閒早餐。", transport: "-", map: "Chinatown", cost: "-" },
+                    { time: "12:00", type: "transport", name: "前往機場", info: "預約私家車送機，帶著滿滿的回憶返家。", transport: "預約包車接送：直達機場航廈。", map: "Sydney+Airport", cost: "$$" }
+                ]
             }
         ];
 
+        let currentMenu = 'itinerary';
+        let currentDayIdx = 0;
+        let expenses = JSON.parse(localStorage.getItem('sydney_expenses')) || [];
+
         function init() {
-            renderDayBar();
-            updateView();
-            renderExpenses();
+            renderTabs();
+            renderContent();
         }
 
-        function switchTab(t) {
-            document.getElementById('view-trip').classList.toggle('hidden', t !== 'trip');
-            document.getElementById('view-wallet').classList.toggle('hidden', t !== 'wallet');
-            document.getElementById('nav-trip').className = t === 'trip' ? 'nav-active flex flex-col items-center gap-1' : 'nav-inactive flex flex-col items-center gap-1';
-            document.getElementById('nav-wallet').className = t === 'wallet' ? 'nav-active flex flex-col items-center gap-1' : 'nav-inactive flex flex-col items-center gap-1';
-        }
-
-        function renderDayBar() {
-            const bar = document.getElementById('day-scroller');
-            bar.innerHTML = tripData.map((d, i) => `
-                <button onclick="setDay(${i})" class="day-btn w-12 h-12 rounded-xl flex-shrink-0 flex flex-col items-center justify-center font-bold ${i === dayIdx ? 'active' : 'bg-white/10 text-white/40'}">
-                    <span class="text-[8px]">D</span>
-                    <span class="text-base">${d.d}</span>
-                </button>
-            `).join('');
-            bar.scrollTo({ left: dayIdx * 50, behavior: 'smooth' });
-        }
-
-        function setDay(i) {
-            dayIdx = i;
-            renderDayBar();
-            updateView();
-        }
-
-        function updateView() {
-            const d = tripData[dayIdx];
-            document.getElementById('ui-day-label').innerText = `Day ${d.d}`;
-            document.getElementById('ui-day-title').innerText = d.t;
-            
-            // 預訂連結
-            const linkDisplay = document.getElementById('booking-links');
-            if(d.links && d.links.length > 0) {
-                linkDisplay.innerHTML = d.links.map(l => `
-                    <a href="${l.url}" target="_blank" class="${l.icon === 'fa-car' ? 'car-btn' : 'kkday-btn'}">
-                        <i class="fa-solid ${l.icon}"></i> ${l.name}
-                    </a>
-                `).join('');
-                linkDisplay.classList.remove('hidden');
-            } else {
-                linkDisplay.innerHTML = '';
-            }
-
-            // 交通方式
-            document.getElementById('transport-display').innerHTML = `<span class="transport-tag"><i class="fa-solid fa-bus"></i> 建議交通：${d.trans}</span>`;
-            
-            // 行程列表
-            document.getElementById('itinerary-list').innerHTML = d.s.map(item => `
-                <div class="card flex items-center justify-between py-4">
-                    <div class="flex items-center gap-3">
-                        <i class="fa-solid fa-circle-check text-sky-200"></i>
-                        <span class="font-bold text-slate-700 text-sm">${item}</span>
-                    </div>
-                    <button onclick="openMap('${item}')" class="w-10 h-10 bg-slate-50 rounded-xl text-sky-600 flex items-center justify-center">
-                        <i class="fa-solid fa-map"></i>
-                    </button>
+        function renderTabs() {
+            const container = document.getElementById('dateTabs');
+            container.innerHTML = itineraryData.map((day, idx) => `
+                <div onclick="switchDay(${idx})" class="flex-shrink-0 flex flex-col items-center transition-all ${idx === currentDayIdx ? 'active-tab' : 'text-slate-300'}">
+                    <span class="text-[8px] font-black uppercase tracking-widest">${day.weekday}</span>
+                    <span class="text-xl font-black">${day.date.split('-')[2]}</span>
                 </div>
             `).join('');
-            
-            document.getElementById('expert-tips').innerHTML = d.tips;
         }
 
-        function openMap(q) {
-            window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q + ' Sydney')}`, '_blank');
+        function switchDay(idx) {
+            currentDayIdx = idx;
+            renderTabs();
+            renderContent();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function saveExpense() {
-            const name = document.getElementById('exp-name').value;
-            const aud = parseFloat(document.getElementById('exp-aud').value);
-            if(!name || isNaN(aud)) return;
-            expenses.push({ id: Date.now(), name, aud, twd: Math.round(aud * rate) });
-            localStorage.setItem('sydney_trip_data', JSON.stringify(expenses));
-            document.getElementById('exp-name').value = '';
-            document.getElementById('exp-aud').value = '';
-            renderExpenses();
+        function openMap(query) {
+            window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
         }
 
-        function deleteExpense(id) {
-            expenses = expenses.filter(e => e.id !== id);
-            localStorage.setItem('sydney_trip_data', JSON.stringify(expenses));
-            renderExpenses();
-        }
+        function renderContent() {
+            const appContent = document.getElementById('appContent');
+            const data = itineraryData[currentDayIdx];
 
-        function renderExpenses() {
-            const list = document.getElementById('expense-list');
-            let tAUD = 0, tTWD = 0;
-            list.innerHTML = expenses.map(e => {
-                tAUD += e.aud; tTWD += e.twd;
-                return `
-                    <div class="bg-white p-4 rounded-xl flex justify-between items-center border border-slate-50">
-                        <div class="text-sm font-bold text-slate-700">${e.name}</div>
-                        <div class="flex items-center gap-3">
-                            <span class="text-sky-600 font-black">$ ${e.aud}</span>
-                            <button onclick="deleteExpense(${e.id})" class="text-slate-200"><i class="fa-solid fa-xmark"></i></button>
+            if(currentMenu !== 'itinerary') return;
+
+            let html = `
+                <div class="relative h-48 rounded-[32px] overflow-hidden card-shadow">
+                    <img src="${data.img}" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 img-gradient flex flex-col justify-end p-6">
+                        <div class="flex justify-between items-end">
+                            <div>
+                                <p class="text-white/60 text-[10px] font-black tracking-widest uppercase mb-1">Day ${currentDayIdx + 1} • ${data.weekday}</p>
+                                <h2 class="text-2xl font-black text-white leading-tight">${data.title}</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-amber-50 border border-amber-100 rounded-2xl p-4 flex gap-4">
+                    <div class="bg-amber-500 w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0"><i class="fa-solid fa-person-cane"></i></div>
+                    <div>
+                        <h4 class="font-bold text-amber-900 text-sm">家長隨行筆記</h4>
+                        <p class="text-[11px] text-amber-700 leading-relaxed mt-0.5">${data.seniorNote}</p>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+            `;
+
+            data.events.forEach(event => {
+                let color = "text-emerald-500", bgCol = "bg-emerald-50";
+                if(event.type === 'food') { color = "text-orange-500"; bgCol = "bg-orange-50"; }
+                if(event.type === 'transport') { color = "text-blue-500"; bgCol = "bg-blue-50"; }
+                if(event.type === 'hotel') { color = "text-indigo-500"; bgCol = "bg-indigo-50"; }
+
+                html += `
+                    <div class="bg-white rounded-3xl p-5 card-shadow border border-slate-50 space-y-4">
+                        <div class="flex justify-between items-start">
+                            <div class="flex gap-4">
+                                <div class="text-center">
+                                    <span class="font-black text-slate-800 text-sm block">${event.time}</span>
+                                    <div class="w-1 h-1 bg-slate-200 rounded-full mx-auto mt-2"></div>
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <h4 class="font-black text-slate-800 text-sm">${event.name}</h4>
+                                        <span class="${bgCol} ${color} text-[8px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider">${event.type}</span>
+                                    </div>
+                                    <p class="text-slate-400 text-[11px] mt-1 font-medium"><i class="fa-solid fa-star text-amber-400 mr-1"></i>${event.info}</p>
+                                </div>
+                            </div>
+                            <button onclick="openMap('${event.map}')" class="bg-blue-600 text-white w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200">
+                                <i class="fa-solid fa-location-arrow text-sm"></i>
+                            </button>
+                        </div>
+
+                        <div class="bg-slate-50 rounded-2xl p-4 flex gap-3 items-start">
+                            <i class="fa-solid fa-route text-blue-400 text-xs mt-1"></i>
+                            <div class="flex-1">
+                                <span class="text-[9px] font-black text-slate-300 uppercase tracking-widest block mb-1">交通導引</span>
+                                <p class="text-[11px] text-slate-600 leading-relaxed font-medium">${event.transport}</p>
+                            </div>
                         </div>
                     </div>
                 `;
-            }).reverse().join('');
-            document.getElementById('total-aud').innerText = `$ ${tAUD.toFixed(1)}`;
-            document.getElementById('total-twd').innerText = `$ ${tTWD.toLocaleString()}`;
+            });
+
+            html += `</div>`;
+            appContent.innerHTML = html;
         }
 
-        window.onload = init;
+        function renderExpense() {
+            const totalAUD = expenses.reduce((sum, item) => sum + Number(item.amount), 0);
+            const totalTWD = totalAUD * AUD_TO_TWD;
+
+            let html = `
+                <div class="bg-slate-900 rounded-[32px] p-8 text-white card-shadow relative overflow-hidden">
+                    <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-2">Total Trip Expense</p>
+                    <div class="flex items-baseline gap-2">
+                        <h2 class="text-3xl font-black tracking-tight">$${totalAUD.toFixed(1)} <span class="text-sm font-normal text-slate-400 uppercase">aud</span></h2>
+                    </div>
+                    <div class="bg-white/10 text-white inline-block px-4 py-1.5 rounded-full text-xs font-black mt-4 backdrop-blur-md">
+                        約 NT$ ${Math.round(totalTWD).toLocaleString()}
+                    </div>
+                    <div class="absolute right-[-20px] bottom-[-20px] text-white/5 text-[120px]"><i class="fa-solid fa-coins"></i></div>
+                </div>
+
+                <div class="bg-white rounded-3xl p-6 card-shadow space-y-4">
+                    <h3 class="font-black text-slate-800 text-sm">新增支出</h3>
+                    <div class="space-y-3">
+                        <input id="exp-name" type="text" placeholder="項目內容" class="w-full bg-slate-50 border-none rounded-2xl p-4 text-sm focus:ring-2 focus:ring-blue-500">
+                        <div class="flex gap-2">
+                            <div class="relative flex-1">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 uppercase">Aud</span>
+                                <input id="exp-amount" type="number" placeholder="金額" class="w-full bg-slate-50 border-none rounded-2xl p-4 pl-12 text-sm focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <button onclick="addExpense()" class="bg-blue-600 text-white px-8 rounded-2xl font-black text-sm shadow-lg shadow-blue-100">儲存</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <h3 class="font-black text-slate-800 text-xs px-2">消費清單</h3>
+                    ${expenses.slice().reverse().map((item, idx) => `
+                        <div class="bg-white rounded-2xl p-4 flex justify-between items-center card-shadow">
+                            <div class="flex items-center gap-4">
+                                <div class="bg-slate-50 w-10 h-10 rounded-xl flex items-center justify-center text-slate-400"><i class="fa-solid fa-receipt"></i></div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 text-xs">${item.name}</h4>
+                                    <p class="text-[9px] text-slate-400 font-medium">${item.date}</p>
+                                </div>
+                            </div>
+                            <div class="text-right flex items-center gap-4">
+                                <div>
+                                    <div class="font-black text-slate-800 text-sm">$${item.amount}</div>
+                                    <div class="text-[9px] text-blue-500 font-bold">NT$ ${Math.round(item.amount * AUD_TO_TWD)}</div>
+                                </div>
+                                <button onclick="deleteExpense(${expenses.length - 1 - idx})" class="text-slate-200"><i class="fa-solid fa-circle-xmark text-lg"></i></button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            document.getElementById('appContent').innerHTML = html;
+        }
+
+        function addExpense() {
+            const name = document.getElementById('exp-name').value;
+            const amount = document.getElementById('exp-amount').value;
+            if(!name || !amount) return;
+            expenses.push({ name, amount: parseFloat(amount), date: new Date().toLocaleDateString('zh-TW') });
+            localStorage.setItem('sydney_expenses', JSON.stringify(expenses));
+            renderExpense();
+        }
+
+        function deleteExpense(idx) {
+            expenses.splice(idx, 1);
+            localStorage.setItem('sydney_expenses', JSON.stringify(expenses));
+            renderExpense();
+        }
+
+        function changeMenu(type) {
+            currentMenu = type;
+            document.querySelectorAll('nav button').forEach(btn => btn.className = "text-slate-400 flex flex-col items-center gap-1");
+            document.getElementById('menu-' + type).className = "text-blue-500 flex flex-col items-center gap-1 scale-105";
+            if(type === 'itinerary') renderContent();
+            else if(type === 'expense') renderExpense();
+            else renderEssentials();
+        }
+
+        function renderEssentials() {
+            document.getElementById('appContent').innerHTML = `
+                <div class="bg-white rounded-[32px] p-6 card-shadow space-y-6">
+                    <h2 class="text-lg font-black text-slate-800">雪梨家族指南</h2>
+                    <div class="space-y-6">
+                        <div class="flex gap-4">
+                            <div class="w-12 h-12 bg-sky-100 rounded-2xl flex items-center justify-center text-sky-500 shrink-0"><i class="fa-solid fa-train-subway"></i></div>
+                            <div>
+                                <h4 class="font-black text-sm text-slate-800">Opal 交通卡免買</h4>
+                                <p class="text-[11px] text-slate-500 leading-relaxed mt-1">直接感應帶有晶片的信用卡或手機 (Apple/Google Pay) 即可，四個人各刷各的，匯率最划算且與 Opal 卡同價。</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center text-orange-500 shrink-0"><i class="fa-solid fa-plug"></i></div>
+                            <div>
+                                <h4 class="font-black text-sm text-slate-800">澳洲插頭 (八字型)</h4>
+                                <p class="text-[11px] text-slate-500 leading-relaxed mt-1">電壓為 240V，插頭是三孔八字型，請務必備妥轉換頭。</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center text-indigo-500 shrink-0"><i class="fa-solid fa-umbrella-beach"></i></div>
+                            <div>
+                                <h4 class="font-black text-sm text-slate-800">氣候預備 (9-10月)</h4>
+                                <p class="text-[11px] text-slate-500 leading-relaxed mt-1">雪梨春季早晚溫差大，長輩出門必備薄外套。太陽極強，防曬乳、墨鏡、遮陽帽缺一不可。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        init();
     </script>
 </body>
 </html>
